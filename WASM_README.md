@@ -60,6 +60,7 @@ import init, { WasmMatcher, create_default_config } from './pkg/frizbee';
 - `new WasmMatcher()` - Create a new matcher instance
 - `matchList(needle: string, haystacks: string[], config?: Config)` - Find matches in a list
 - `matchIndices(needle: string, haystack: string, config?: Config)` - Get character indices of matches
+- `compareAll(items: string[], config?: Config, minScore?: number)` - Compare all items against each other
 
 ### Configuration Functions
 
@@ -107,6 +108,33 @@ const advancedConfig = create_custom_config(true, 1, true, scoring);
 ```
 
 See `custom-config-example.js` for comprehensive examples of different configurations optimized for various use cases (file paths, code identifiers, URLs, etc.)
+
+### Compare All Function
+
+The `compareAll` function compares every item in a list against every other item, returning similarity scores for all pairs:
+
+```javascript
+const items = ["user_service", "UserService", "product_service", "ProductService"];
+const comparisons = matcher.compareAll(items, config, 10); // min score of 10
+
+// Returns array of ComparisonResult objects:
+// [{
+//   needle: "user_service",
+//   haystack: "UserService", 
+//   needle_index: 0,
+//   haystack_index: 1,
+//   score: 25,
+//   exact: false
+// }, ...]
+```
+
+Use cases:
+- Finding duplicate or near-duplicate entries
+- Clustering similar items together
+- Building similarity matrices
+- Detecting naming inconsistencies
+
+See `compare-all-example.js` and `compare-all-example.ts` for detailed examples.
 
 ## Notes
 

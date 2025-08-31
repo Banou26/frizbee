@@ -2,15 +2,16 @@
   "name": "frizbee-wasm",
   "version": "0.5.0",
   "description": "Fast fuzzy matching via SIMD smith waterman - WASM package for browser use",
-  "main": "pkg/frizbee_wasm.js",
-  "types": "pkg/frizbee_wasm.d.ts",
+  "main": "pkg/frizbee.js",
+  "types": "frizbee-wasm.d.ts",
   "files": [
     "pkg/**/*"
   ],
   "scripts": {
-    "build": "wasm-pack build --target web --out-dir pkg --features wasm",
-    "build:node": "wasm-pack build --target nodejs --out-dir pkg-node --features wasm",
-    "build:bundler": "wasm-pack build --target bundler --out-dir pkg-bundler --features wasm"
+    "build": "wasm-pack build --target web --out-dir pkg --features wasm && node fix-types.js",
+    "build:node": "wasm-pack build --target nodejs --out-dir pkg-node --features wasm && node fix-types.js",
+    "build:bundler": "wasm-pack build --target bundler --out-dir pkg-bundler --features wasm && node fix-types.js",
+    "fix-types": "node fix-types.js"
   },
   "keywords": [
     "fuzzy",
