@@ -14,6 +14,9 @@ mod one_shot;
 pub mod prefilter;
 pub mod smith_waterman;
 
+#[cfg(feature = "wasm")]
+pub mod wasm;
+
 pub use incremental::IncrementalMatcher;
 pub use one_shot::{match_indices, match_list, match_list_parallel};
 

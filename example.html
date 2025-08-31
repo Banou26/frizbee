@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frizbee WASM Example</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+        }
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            font-size: 16px; 
+            margin-bottom: 20px;
+        }
+        .results { 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            min-height: 200px;
+            background: #f5f5f5;
+        }
+        .match { 
+            padding: 5px; 
+            margin: 5px 0;
+            background: white;
+            border-radius: 3px;
+        }
+        .highlighted {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Frizbee WASM Fuzzy Search Demo</h1>
+    <input type="text" id="searchInput" placeholder="Type to search...">
+    <div id="results" class="results"></div>
+
+    <script type="module">
+        import init, { WasmMatcher, create_default_config } from './pkg/frizbee_wasm.js';
+
+        async function run() {
+            await init();
+
+            const matcher = new WasmMatcher();
+            const defaultConfig = create_default_config();
+            
+            // Sample data to search
+            const items = [
+                "hello_world.js",
+                "HelloWorldComponent.tsx", 
+                "main.rs",
+                "package.json",
+                "README.md",
+                "src/components/Button.tsx",
+                "src/utils/helpers.js",
+                "tests/unit/example.test.js",
+                "config/webpack.config.js",
+                "node_modules/react/index.js"
+            ];
+
+            const searchInput = document.getElementById('searchInput');
+            const resultsDiv = document.getElementById('results');
+
+            searchInput.addEventListener('input', (e) => {
+                const needle = e.target.value;
+                
+                if (needle.length === 0) {
+                    resultsDiv.innerHTML = '<p>Type to search...</p>';
+                    return;
+                }
+
+                try {
+                    const matches = matcher.matchList(needle, items, defaultConfig);
+                    
+                    if (matches.length === 0) {
+                        resultsDiv.innerHTML = '<p>No matches found</p>';
+                    } else {
+                        resultsDiv.innerHTML = matches
+                            .map(match => {
+                                const item = items[match.index];
+                                // Get match indices for highlighting
+                                const indices = matcher.matchIndices(needle, item, defaultConfig);
+                                
+                                let highlighted = item;
+                                if (indices && indices.indices) {
+                                    // Build highlighted string
+                                    let result = '';
+                                    let lastIndex = 0;
+                                    for (const idx of indices.indices) {
+                                        result += item.slice(lastIndex, idx);
+                                        result += `<span class="highlighted">${item[idx]}</span>`;
+                                        lastIndex = idx + 1;
+                                    }
+                                    result += item.slice(lastIndex);
+                                    highlighted = result;
+                                }
+                                
+                                return `<div class="match">
+                                    ${highlighted} 
+                                    <small>(score: ${match.score})</small>
+                                </div>`;
+                            })
+                            .join('');
+                    }
+                } catch (error) {
+                    resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+                }
+            });
+        }
+
+        run();
+    </script>
+</body>
+</html>
