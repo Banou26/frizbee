@@ -1,4 +1,10 @@
-import init, { WasmMatcher, create_default_config, create_default_scoring } from './pkg/frizbee_wasm';
+import init, { 
+    WasmMatcher, 
+    create_default_config, 
+    create_default_scoring,
+    create_custom_config,
+    create_custom_scoring
+} from './pkg/frizbee_wasm';
 
 // TypeScript interfaces for configuration
 interface Scoring {
@@ -44,13 +50,36 @@ async function main() {
     // Get default configuration
     const defaultConfig: Config = create_default_config();
     
-    // Custom configuration example
-    const customConfig: Config = {
-        prefilter: true,
-        max_typos: 2,
-        sort: true,
-        scoring: create_default_scoring()
-    };
+    // Create custom configuration using helper function
+    const customConfig: Config = create_custom_config(
+        true,     // prefilter
+        2,        // max_typos (or undefined for unlimited)
+        true,     // sort
+        undefined // use default scoring
+    );
+    
+    // Create custom scoring with specific parameters
+    const customScoring: Scoring = create_custom_scoring(
+        16,       // match_score
+        4,        // mismatch_penalty
+        6,        // gap_open_penalty
+        2,        // gap_extend_penalty
+        8,        // prefix_bonus
+        4,        // offset_prefix_bonus
+        4,        // capitalization_bonus
+        2,        // matching_case_bonus
+        20,       // exact_match_bonus
+        8,        // delimiter_bonus
+        " /._-"   // delimiters
+    );
+    
+    // Create config with custom scoring
+    const advancedConfig: Config = create_custom_config(
+        true,           // prefilter
+        undefined,      // unlimited typos
+        false,          // don't sort
+        customScoring   // use custom scoring
+    );
 
     // Sample data
     const files = [

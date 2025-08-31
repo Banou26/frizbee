@@ -61,18 +61,52 @@ import init, { WasmMatcher, create_default_config } from './pkg/frizbee';
 - `matchList(needle: string, haystacks: string[], config?: Config)` - Find matches in a list
 - `matchIndices(needle: string, haystack: string, config?: Config)` - Get character indices of matches
 
-### Helper Functions
+### Configuration Functions
 
 - `create_default_config()` - Get default configuration
 - `create_default_scoring()` - Get default scoring parameters
+- `create_custom_config(prefilter: boolean, max_typos?: number, sort: boolean, scoring?: Scoring)` - Create custom configuration
+- `create_custom_scoring(...)` - Create custom scoring with specific parameters (all optional)
 
 ## Configuration
 
 The `Config` object supports:
 - `prefilter`: Enable prefiltering for performance
-- `max_typos`: Maximum allowed typos (null for unlimited)
+- `max_typos`: Maximum allowed typos (undefined/null for unlimited)
 - `sort`: Sort results by score
 - `scoring`: Scoring parameters object
+
+### Creating Custom Configurations
+
+```javascript
+// Simple custom config
+const config = create_custom_config(
+    true,     // prefilter
+    2,        // max_typos
+    true,     // sort
+    undefined // use default scoring
+);
+
+// Custom scoring parameters
+const scoring = create_custom_scoring(
+    16,       // match_score
+    4,        // mismatch_penalty
+    6,        // gap_open_penalty
+    2,        // gap_extend_penalty
+    8,        // prefix_bonus
+    4,        // offset_prefix_bonus
+    4,        // capitalization_bonus
+    2,        // matching_case_bonus
+    20,       // exact_match_bonus
+    8,        // delimiter_bonus
+    " /._-"   // delimiters
+);
+
+// Config with custom scoring
+const advancedConfig = create_custom_config(true, 1, true, scoring);
+```
+
+See `custom-config-example.js` for comprehensive examples of different configurations optimized for various use cases (file paths, code identifiers, URLs, etc.)
 
 ## Notes
 

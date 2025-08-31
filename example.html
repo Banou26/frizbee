@@ -41,13 +41,51 @@
     <div id="results" class="results"></div>
 
     <script type="module">
-        import init, { WasmMatcher, create_default_config } from './pkg/frizbee_wasm.js';
+        import init, { 
+            WasmMatcher, 
+            create_default_config,
+            create_custom_config,
+            create_custom_scoring
+        } from './pkg/frizbee_wasm.js';
 
         async function run() {
             await init();
 
             const matcher = new WasmMatcher();
+            
+            // You can use default config
             const defaultConfig = create_default_config();
+            
+            // Or create a custom config
+            const customConfig = create_custom_config(
+                true,  // prefilter
+                1,     // max_typos (1 typo allowed)
+                true,  // sort results
+                null   // use default scoring
+            );
+            
+            // Or create custom scoring parameters
+            const strictScoring = create_custom_scoring(
+                20,    // higher match score
+                8,     // higher mismatch penalty
+                10,    // higher gap open penalty
+                4,     // gap extend penalty
+                10,    // prefix bonus
+                5,     // offset prefix bonus
+                5,     // capitalization bonus
+                3,     // matching case bonus
+                30,    // exact match bonus
+                10,    // delimiter bonus
+                " /._-@" // delimiters including @
+            );
+            
+            // Use custom scoring in config
+            const strictConfig = create_custom_config(
+                true,
+                0,     // no typos allowed
+                true,
+                strictScoring
+            );
             
             // Sample data to search
             const items = [
@@ -75,7 +113,8 @@
                 }
 
                 try {
-                    const matches = matcher.matchList(needle, items, defaultConfig);
+                    // Use customConfig instead of defaultConfig for more control
+                    const matches = matcher.matchList(needle, items, customConfig);
                     
                     if (matches.length === 0) {
                         resultsDiv.innerHTML = '<p>No matches found</p>';
@@ -84,7 +123,7 @@
                             .map(match => {
                                 const item = items[match.index];
                                 // Get match indices for highlighting
-                                const indices = matcher.matchIndices(needle, item, defaultConfig);
+                                const indices = matcher.matchIndices(needle, item, customConfig);
                                 
                                 let highlighted = item;
                                 if (indices && indices.indices) {
