@@ -5,7 +5,8 @@
   "main": "pkg/frizbee.js",
   "types": "frizbee-wasm.d.ts",
   "files": [
-    "pkg/**/*"
+    "pkg/**/*",
+    "frizbee-wasm.d.ts"
   ],
   "scripts": {
     "build": "wasm-pack build --target web --out-dir pkg --features wasm && node fix-types.js",

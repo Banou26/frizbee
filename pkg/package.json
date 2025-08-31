@@ -1,0 +1,21 @@
+{
+  "name": "frizbee",
+  "type": "module",
+  "description": "Fast fuzzy matching via SIMD smith waterman, similar algorithm to FZF/FZY",
+  "version": "0.5.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saghen/frizbee"
+  },
+  "files": [
+    "frizbee_bg.wasm",
+    "frizbee.js",
+    "frizbee.d.ts"
+  ],
+  "main": "frizbee.js",
+  "types": "frizbee.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
