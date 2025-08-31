@@ -5,6 +5,7 @@
 
 use std::cmp::Ordering;
 
+#[cfg(feature = "wasm")]
 use serde::{Deserialize, Serialize};
 
 mod r#const;
@@ -13,6 +14,7 @@ mod one_shot;
 pub mod prefilter;
 pub mod smith_waterman;
 
+#[cfg(feature = "wasm")]
 pub mod wasm;
 
 pub use incremental::IncrementalMatcher;

@@ -1,7 +1,18 @@
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen;
+use serde::{Serialize, Deserialize};
 
 use crate::{Config, Scoring};
+
+#[derive(Serialize, Deserialize)]
+pub struct ComparisonResult {
+    pub needle: String,
+    pub haystack: String,
+    pub needle_index: usize,
+    pub haystack_index: usize,
+    pub score: u16,
+    pub exact: bool,
+}
 
 #[wasm_bindgen]
 pub struct WasmMatcher;
@@ -47,6 +58,51 @@ impl WasmMatcher {
             },
             None => Ok(JsValue::NULL)
         }
+    }
+
+    #[wasm_bindgen(js_name = compareAll)]
+    pub fn compare_all(&self, items: Vec<String>, config_js: JsValue, min_score: Option<u16>) -> Result<JsValue, JsValue> {
+        let config: Config = if config_js.is_undefined() || config_js.is_null() {
+            Config::default()
+        } else {
+            serde_wasm_bindgen::from_value(config_js)
+                .map_err(|e| JsValue::from_str(&format!("Config parse error: {:?}", e)))?
+        };
+
+        let min_score = min_score.unwrap_or(0);
+        let mut results: Vec<ComparisonResult> = Vec::new();
+
+        // Compare every item against every other item
+        for (i, needle) in items.iter().enumerate() {
+            for (j, haystack) in items.iter().enumerate() {
+                // Skip comparing an item with itself if they're the exact same string
+                if i == j {
+                    continue;
+                }
+
+                // Get the match score
+                let match_result = crate::match_indices(needle, haystack, config.clone());
+                
+                if let Some(indices) = match_result {
+                    if indices.score >= min_score {
+                        results.push(ComparisonResult {
+                            needle: needle.clone(),
+                            haystack: haystack.clone(),
+                            needle_index: i,
+                            haystack_index: j,
+                            score: indices.score,
+                            exact: indices.exact,
+                        });
+                    }
+                }
+            }
+        }
+
+        // Sort by score (highest first)
+        results.sort_by(|a, b| b.score.cmp(&a.score));
+
+        serde_wasm_bindgen::to_value(&results)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
     }
 }
 
