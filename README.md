@@ -7,12 +7,12 @@ Used by [blink.cmp](https://github.com/saghen/blink.cmp), [skim](https://github.
 ## Usage
 
 ```rust
-use frizbee::{match_list, Options};
+use frizbee::{match_list, Config};
 
 let needle = "fBr";
 let haystacks = ["fooBar", "foo_bar", "prelude", "println!"];
 
-let matches = match_list(needle, &haystacks, Options::default());
+let matches = match_list(needle, &haystacks, Config::default());
 ```
 
 ## Benchmarks
