@@ -115,8 +115,8 @@ impl<Simd128: Vector128Expansion<Simd256>, Simd256: Vector256>
 
         unsafe {
             // Constants
-            let gap_extend = Simd256::splat_u16(scoring.gap_extend_penalty);
-            let gap_open =
+            let gap_extend_penalty = Simd256::splat_u16(scoring.gap_extend_penalty);
+            let gap_open_penalty =
                 Simd256::splat_u16(scoring.gap_open_penalty - scoring.gap_extend_penalty);
             let match_score = Simd256::splat_u16(scoring.match_score + scoring.mismatch_penalty);
             let mismatch_penalty = Simd256::splat_u16(scoring.mismatch_penalty);
@@ -217,9 +217,9 @@ impl<Simd128: Vector128Expansion<Simd256>, Simd256: Vector256>
                     // Up - skipping char in needle
                     let up_scores = {
                         // Always apply gap extend penalty
-                        let score_after_gap_extend = prev_row_scores.subs_u16(gap_extend);
+                        let score_after_gap_extend = prev_row_scores.subs_u16(gap_extend_penalty);
                         // Apply gap open penalty - gap extend penalty for opened gaps, avoiding blendv
-                        score_after_gap_extend.subs_u16(up_gap_mask.and(gap_open))
+                        score_after_gap_extend.subs_u16(up_gap_mask.and(gap_open_penalty))
                     };
 
                     // Max of diagonal, up and left (after gap extension)
@@ -228,8 +228,8 @@ impl<Simd128: Vector128Expansion<Simd256>, Simd256: Vector256>
                         score_matrix.get(row_idx, col_idx - 1), // Left
                         match_mask,                             // Current
                         match_masks.get(row_idx, col_idx - 1),  // Left
-                        scoring.gap_open_penalty,
-                        scoring.gap_extend_penalty,
+                        gap_open_penalty,
+                        gap_extend_penalty,
                     );
 
                     // Store results
