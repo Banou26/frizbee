@@ -90,7 +90,7 @@ impl super::Vector for SSE256Vector {
 
             // Find minimum of inverted values (= maximum of original)
             let min_pos = (_mm_minpos_epu16(inverted.0), _mm_minpos_epu16(inverted.1));
-            let min_pos = _mm_min_epu8(min_pos.0, min_pos.1);
+            let min_pos = _mm_min_epu16(min_pos.0, min_pos.1);
 
             // Extract and invert back
             let min_val = _mm_extract_epi16(min_pos, 0) as u16;

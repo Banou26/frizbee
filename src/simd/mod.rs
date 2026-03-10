@@ -370,6 +370,14 @@ mod tests {
     impl<T: Vector128Expansion<Expanded>, Expanded: Vector256> Vector128ExpansionTests<Expanded> for T {}
 
     pub trait Vector256Tests: Vector256 {
+        unsafe fn test_smax_u16_256() {
+            unsafe {
+                let a =
+                    Self::from_array_256_u16([0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 256]);
+                assert_eq!(a.smax_u16(), 256);
+            }
+        }
+
         unsafe fn test_idx_u16() {
             unsafe {
                 let a = Self::from_array_256_u16([
@@ -391,6 +399,7 @@ mod tests {
                 assert_eq!(a.idx_u16(13), 13);
                 assert_eq!(a.idx_u16(14), 14);
                 assert_eq!(a.idx_u16(15), 15);
+                assert_eq!(a.idx_u16(u16::MAX), 16);
 
                 let b = Self::from_array_256_u16([
                     200, 150, 2, 3, 4, 5, 6, 7, 150, 9, 2, 11, 12, 13, 14, 200,
@@ -470,6 +479,7 @@ mod tests {
     simd_test!(test_shift_right_padded_u16);
     simd128_test!(test_load_partial);
     simd128_test!(test_shift_right_padded_u8);
+    simd256_test!(test_smax_u16_256);
     simd256_test!(test_idx_u16);
 
     #[test]
