@@ -22,17 +22,6 @@ impl<Simd256: Vector256> Matrix<Simd256> {
     }
 
     #[inline(always)]
-    pub fn zero(&mut self) {
-        unsafe {
-            std::ptr::write_bytes(
-                self.matrix.as_mut_ptr(),
-                0,
-                (self.haystack_chunks + 1) * (self.needle_len + 1),
-            );
-        }
-    }
-
-    #[inline(always)]
     pub fn get(&self, needle_idx: usize, haystack_idx: usize) -> Simd256 {
         unsafe {
             *self
