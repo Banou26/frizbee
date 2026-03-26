@@ -246,11 +246,13 @@ version = "0.8.3"
 dependencies = [
  "criterion",
  "itertools 0.14.0",
+ "js-sys",
  "nucleo",
  "rand",
  "rand_distr",
  "raw-cpuid",
  "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]

@@ -120,8 +120,13 @@ mod one_shot;
 pub mod prefilter;
 mod simd;
 pub mod smith_waterman;
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub use one_shot::{Matcher, match_list, match_list_indices, match_list_parallel};
+#[cfg(target_arch = "wasm32")]
+pub use one_shot::{Matcher, match_list, match_list_indices};
 
 use r#const::*;
 

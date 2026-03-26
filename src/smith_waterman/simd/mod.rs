@@ -2,6 +2,8 @@
 use crate::simd::{AVXVector, SSE256Vector, SSEVector};
 #[cfg(target_arch = "aarch64")]
 use crate::simd::{NEON256Vector, NEONVector};
+#[cfg(target_arch = "wasm32")]
+use crate::simd::{WASM256Vector, WASMVector};
 use crate::{Scoring, simd::Vector};
 
 mod algo;
@@ -23,6 +25,8 @@ pub enum SmithWatermanMatcher {
     SSE(SmithWatermanMatcherSSE),
     #[cfg(target_arch = "aarch64")]
     NEON(SmithWatermanMatcherNEON),
+    #[cfg(target_arch = "wasm32")]
+    WASM(SmithWatermanMatcherWASM),
 }
 
 impl SmithWatermanMatcher {
@@ -40,6 +44,9 @@ impl SmithWatermanMatcher {
 
         #[cfg(target_arch = "aarch64")]
         return Self::NEON(unsafe { SmithWatermanMatcherNEON::new(needle, scoring) });
+
+        #[cfg(target_arch = "wasm32")]
+        return Self::WASM(unsafe { SmithWatermanMatcherWASM::new(needle, scoring) });
     }
 
     pub fn match_haystack(&mut self, haystack: &[u8], max_typos: Option<u16>) -> Option<u16> {
@@ -50,6 +57,8 @@ impl SmithWatermanMatcher {
             Self::SSE(matcher) => unsafe { matcher.match_haystack(haystack, max_typos) },
             #[cfg(target_arch = "aarch64")]
             Self::NEON(matcher) => unsafe { matcher.match_haystack(haystack, max_typos) },
+            #[cfg(target_arch = "wasm32")]
+            Self::WASM(matcher) => unsafe { matcher.match_haystack(haystack, max_typos) },
         }
     }
 
@@ -72,6 +81,10 @@ impl SmithWatermanMatcher {
             Self::NEON(matcher) => unsafe {
                 matcher.match_haystack_indices(haystack, skipped_chunks, max_typos)
             },
+            #[cfg(target_arch = "wasm32")]
+            Self::WASM(matcher) => unsafe {
+                matcher.match_haystack_indices(haystack, skipped_chunks, max_typos)
+            },
         }
     }
 
@@ -83,6 +96,8 @@ impl SmithWatermanMatcher {
             Self::SSE(matcher) => unsafe { matcher.score_haystack(haystack) },
             #[cfg(target_arch = "aarch64")]
             Self::NEON(matcher) => unsafe { matcher.score_haystack(haystack) },
+            #[cfg(target_arch = "wasm32")]
+            Self::WASM(matcher) => unsafe { matcher.score_haystack(haystack) },
         }
     }
 
@@ -127,6 +142,16 @@ impl SmithWatermanMatcher {
                 score,
                 max_typos,
             ),
+            #[cfg(target_arch = "wasm32")]
+            Self::WASM(m) => AlignmentPathIter::new(
+                &m.0.score_matrix,
+                &m.0.match_masks,
+                m.0.needle.len(),
+                m.0.haystack_chunks,
+                skipped_chunks,
+                score,
+                max_typos,
+            ),
         }
     }
 
@@ -139,6 +164,8 @@ impl SmithWatermanMatcher {
             Self::SSE(matcher) => unsafe { matcher.print_score_matrix(haystack) },
             #[cfg(target_arch = "aarch64")]
             Self::NEON(matcher) => unsafe { matcher.print_score_matrix(haystack) },
+            #[cfg(target_arch = "wasm32")]
+            Self::WASM(matcher) => unsafe { matcher.print_score_matrix(haystack) },
         }
     }
 }
@@ -235,6 +262,15 @@ define_matcher!(
     large = NEON256Vector,
     target_feature = "neon",
     available = NEONVector::is_available() && NEON256Vector::is_available()
+);
+
+#[cfg(target_arch = "wasm32")]
+define_matcher!(
+    SmithWatermanMatcherWASM,
+    small = WASMVector,
+    large = WASM256Vector,
+    target_feature = "simd128",
+    available = WASMVector::is_available() && WASM256Vector::is_available()
 );
 
 #[cfg(test)]

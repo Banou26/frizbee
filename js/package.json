@@ -1,0 +1,41 @@
+{
+  "name": "frizbee-wasm",
+  "version": "0.8.3",
+  "description": "Fast typo-resistant fuzzy matching via SIMD Smith-Waterman in WebAssembly",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./frizbee.wasm": "./pkg/frizbee_bg.wasm"
+  },
+  "files": [
+    "dist",
+    "pkg"
+  ],
+  "scripts": {
+    "build:wasm": "cd .. && wasm-pack build --target web -d js/pkg",
+    "build:js": "tsc",
+    "build": "npm run build:wasm && npm run build:js"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saghen/frizbee"
+  },
+  "keywords": [
+    "fuzzy",
+    "search",
+    "matching",
+    "smith-waterman",
+    "wasm",
+    "simd",
+    "fzf"
+  ]
+}

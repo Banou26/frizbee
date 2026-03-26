@@ -1,3 +1,9 @@
 /target
 /smith_waterman_macro/target
 /benches/match_list/data.txt
+
+# JS package
+/js/node_modules
+/js/dist
+/js/pkg
+/js/package-lock.json

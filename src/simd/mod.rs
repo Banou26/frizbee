@@ -8,6 +8,10 @@ mod neon_256;
 mod sse;
 #[cfg(target_arch = "x86_64")]
 mod sse_256;
+#[cfg(target_arch = "wasm32")]
+mod wasm;
+#[cfg(target_arch = "wasm32")]
+mod wasm_256;
 
 #[cfg(target_arch = "x86_64")]
 pub use avx::AVXVector;
@@ -19,6 +23,10 @@ pub use neon_256::NEON256Vector;
 pub use sse::SSEVector;
 #[cfg(target_arch = "x86_64")]
 pub use sse_256::SSE256Vector;
+#[cfg(target_arch = "wasm32")]
+pub use wasm::WASMVector;
+#[cfg(target_arch = "wasm32")]
+pub use wasm_256::WASM256Vector;
 
 pub trait Vector: Copy + core::fmt::Debug {
     /// Checks available vector extensions at runtime and returns whether the vector implementation
@@ -428,6 +436,11 @@ mod tests {
                     NEONVector::$name();
                     NEON256Vector::$name();
                 };
+                #[cfg(target_arch = "wasm32")]
+                unsafe {
+                    WASMVector::$name();
+                    WASM256Vector::$name();
+                };
             }
         };
     }
@@ -443,6 +456,10 @@ mod tests {
                 #[cfg(target_arch = "aarch64")]
                 unsafe {
                     NEONVector::$name();
+                };
+                #[cfg(target_arch = "wasm32")]
+                unsafe {
+                    WASMVector::$name();
                 };
             }
         };
@@ -460,6 +477,10 @@ mod tests {
                 #[cfg(target_arch = "aarch64")]
                 unsafe {
                     NEON256Vector::$name();
+                };
+                #[cfg(target_arch = "wasm32")]
+                unsafe {
+                    WASM256Vector::$name();
                 };
             }
         };
@@ -492,6 +513,10 @@ mod tests {
         #[cfg(target_arch = "aarch64")]
         unsafe {
             <NEONVector as Vector128ExpansionTests<NEON256Vector>>::test_cast_i8_to_i16()
+        };
+        #[cfg(target_arch = "wasm32")]
+        unsafe {
+            <WASMVector as Vector128ExpansionTests<WASM256Vector>>::test_cast_i8_to_i16()
         };
     }
 }

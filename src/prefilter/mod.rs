@@ -35,6 +35,8 @@
 #[cfg(target_arch = "aarch64")]
 pub mod aarch64;
 pub mod scalar;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;
 #[cfg(target_arch = "x86_64")]
 pub mod x86_64;
 
@@ -64,21 +66,28 @@ pub enum Prefilter {
     SSE(x86_64::PrefilterSSE),
     #[cfg(target_arch = "aarch64")]
     NEON(aarch64::PrefilterNEON),
+    #[cfg(target_arch = "wasm32")]
+    WASM(wasm32::PrefilterWASM),
 }
 
 impl Prefilter {
     pub fn new(needle: &[u8]) -> Self {
         #[cfg(target_arch = "x86_64")]
-        if x86_64::PrefilterAVX::is_available() {
-            Prefilter::AVX(unsafe { x86_64::PrefilterAVX::new(needle) })
-        } else if x86_64::PrefilterSSE::is_available() {
-            Prefilter::SSE(unsafe { x86_64::PrefilterSSE::new(needle) })
-        } else {
-            panic!("no prefilter algorithm available due to missing SSE2 support");
+        {
+            return if x86_64::PrefilterAVX::is_available() {
+                Prefilter::AVX(unsafe { x86_64::PrefilterAVX::new(needle) })
+            } else if x86_64::PrefilterSSE::is_available() {
+                Prefilter::SSE(unsafe { x86_64::PrefilterSSE::new(needle) })
+            } else {
+                panic!("no prefilter algorithm available due to missing SSE2 support");
+            };
         }
 
         #[cfg(target_arch = "aarch64")]
-        Prefilter::NEON(aarch64::PrefilterNEON::new(needle))
+        return Prefilter::NEON(aarch64::PrefilterNEON::new(needle));
+
+        #[cfg(target_arch = "wasm32")]
+        return Prefilter::WASM(wasm32::PrefilterWASM::new(needle));
     }
 
     /// Checks if the needle is wholly contained in the haystack, ignoring the exact order of the
@@ -108,6 +117,10 @@ impl Prefilter {
             (Prefilter::NEON(p), 0) => unsafe { p.match_haystack(haystack) },
             #[cfg(target_arch = "aarch64")]
             (Prefilter::NEON(p), _) => unsafe { p.match_haystack_typos(haystack, max_typos) },
+            #[cfg(target_arch = "wasm32")]
+            (Prefilter::WASM(p), 0) => unsafe { p.match_haystack(haystack) },
+            #[cfg(target_arch = "wasm32")]
+            (Prefilter::WASM(p), _) => unsafe { p.match_haystack_typos(haystack, max_typos) },
         }
     }
 }

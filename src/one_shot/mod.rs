@@ -1,9 +1,11 @@
 use crate::{Config, Match, MatchIndices};
 
 mod matcher;
+#[cfg(not(target_arch = "wasm32"))]
 mod parallel;
 
 pub use matcher::Matcher;
+#[cfg(not(target_arch = "wasm32"))]
 pub use parallel::match_list_parallel;
 
 pub fn match_list<S1: AsRef<str>, S2: AsRef<str>>(
